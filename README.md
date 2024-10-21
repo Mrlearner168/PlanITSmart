@@ -7,3 +7,11 @@ Please install first the npm packages
 then to start the program 
 ctrl + shift + ~ for windows and type npm start
  for database import planitsmart.sql file
+
+
+for login 
+username : mrlearner@gmail.com
+password: 1234
+
+
+thanks 😃😃 happy coding!
