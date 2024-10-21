@@ -9,7 +9,7 @@
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
-SET time_zone = "+00:00";
+SET time_zone = "+08:00";
 
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
@@ -19,6 +19,8 @@ SET time_zone = "+00:00";
 
 --
 -- Database: `planitsmart`
+CREATE DATABASE PlanITSmart;
+USE PlanITSmart;
 --
 
 -- --------------------------------------------------------
@@ -77,7 +79,7 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`userId`, `name`, `email`, `pass`, `created_at`, `updated_at`) VALUES
-(1, 'Rogelio G. Erdao', 'rogu.erdao.ui@phinmaed.com', '$2b$10$F9MYGeBAo0mr5vO1IPftBuvi41bRLTRIxfUt6JK91MhKIGngO0UpK', '2024-10-20 13:15:41', '2024-10-20 14:53:17');
+(1, 'Mrlearner', 'mrlearner@gmail.com', '$2b$10$F9MYGeBAo0mr5vO1IPftBuvi41bRLTRIxfUt6JK91MhKIGngO0UpK', '2024-10-20 13:15:41', '2024-10-20 14:53:17');
 
 --
 -- Indexes for dumped tables
