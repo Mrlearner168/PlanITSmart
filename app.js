@@ -139,7 +139,7 @@ app.post('/addnote', isAuthenticated, (req, res) => {
 });
 
 // Display dashboard events and notes
-// Display dashboard events and notes
+// Display dashboard events and notes// Display dashboard events and notes
 app.get('/', isAuthenticated, (req, res) => {
     const userId = req.session.user.id;
     const getEvents = `SELECT * FROM events WHERE userId = ?`;
@@ -148,16 +148,28 @@ app.get('/', isAuthenticated, (req, res) => {
     const time = `SELECT startTime, endTime FROM events WHERE userId = ?`;
 
     conn.query(getEvents, [userId], (err, eventData) => {
-        if (err) throw err;
+        if (err) {
+            console.error("Error fetching events:", err);
+            return res.status(500).send("Internal Server Error");
+        }
 
         conn.query(getNotes, [userId], (err, mydata) => {
-            if (err) throw err;
+            if (err) {
+                console.error("Error fetching notes:", err);
+                return res.status(500).send("Internal Server Error");
+            }
 
             conn.query(dates, [userId], (err, dateRows) => {
-                if (err) throw err;
+                if (err) {
+                    console.error("Error fetching dates:", err);
+                    return res.status(500).send("Internal Server Error");
+                }
 
                 conn.query(time, [userId], (err, timedata) => {
-                    if (err) throw err;
+                    if (err) {
+                        console.error("Error fetching time data:", err);
+                        return res.status(500).send("Internal Server Error");
+                    }
 
                     // Calculate minutes for each event
                     const getMinutesDifference = (startTime, endTime) => {
@@ -206,7 +218,7 @@ app.get('/', isAuthenticated, (req, res) => {
 
                     // Output the formatted data
                     console.log(formattedData);
-                    const formatdata = JSON.stringify(formattedData);
+                    const formatdata = formattedData;
 
                     // Render the dashboard with the calculated data
                     res.render('index.ejs', {
@@ -225,6 +237,24 @@ app.get('/', isAuthenticated, (req, res) => {
 });
   
   
+
+//  charts
+app.get('/charts', isAuthenticated, (req, res) => {
+    // Check if userId exists in users table (for debugging)
+    const checkUser_Sql = `SELECT * FROM users WHERE userId = ?`;
+    const userId = req.session.user.id;
+    conn.query(checkUser_Sql, [userId], (err, userName) => {
+        if (err) {
+            console.error("Error checking user:", err);
+            return res.status(500).send("Internal Server Error");
+        }
+    res.render('chart.ejs', {
+        title: "Charts",
+        userName: req.session.user.name,
+        sample2: userName
+    });
+});// This will render anotherFile.ejs
+});
 
 
 // Route to handle profile update
@@ -556,8 +586,6 @@ function isAuthenticated(req, res, next) {
         res.redirect('/login'); // Redirect to login page if not authenticated
     }
 }
-
-
 
 // Start the server
 app.listen(3000, (req, res) => {
