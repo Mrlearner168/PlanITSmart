@@ -33,12 +33,9 @@ app.post('/addevent', isAuthenticated, (req, res) => {
     const description = req.body.description;
     const startDate = req.body.startDate;
     const startTime = req.body.startTime;
-    const endDate = req.body.endDate;
     const endTime = req.body.endTime;
 
-    if (!title || !startDate || !startTime || !endDate || !endTime) {
-        return res.status(400).send("All fields are required");
-    }
+
 
     // Check if userId exists in users table (for debugging)
     const checkUser_Sql = `SELECT * FROM users WHERE userId = ?`;
@@ -54,8 +51,8 @@ app.post('/addevent', isAuthenticated, (req, res) => {
         }
 
         // Proceed with inserting the event
-        const sql = `INSERT INTO events (userId, title, description, startDate, startTime, endDate, endTime) VALUES (?, ?, ?, ?, ?, ?, ?)`;
-        conn.query(sql, [userId, title, description, startDate, startTime, endDate, endTime], (err, result) => {
+        const sql = `INSERT INTO events (userId, title, description, startDate, startTime, endTime) VALUES ( ?, ?, ?, ?, ?, ?)`;
+        conn.query(sql, [userId, title, description, startDate, startTime, endTime], (err, result) => {
             if (err) {
                 console.error("Error inserting event:", err);
                 return res.status(500).send("Internal Server Error");
@@ -142,10 +139,12 @@ app.post('/addnote', isAuthenticated, (req, res) => {
 });
 
 // Display dashboard events and notes
+// Display dashboard events and notes
 app.get('/', isAuthenticated, (req, res) => {
     const userId = req.session.user.id;
     const getEvents = `SELECT * FROM events WHERE userId = ?`;
     const getNotes = `SELECT * FROM notes WHERE userId = ?`;
+    const dates = `SELECT startDate FROM events WHERE userId = ?`;
 
     conn.query(getEvents, [userId], (err, eventData) => {
         if (err) throw err;
@@ -153,14 +152,32 @@ app.get('/', isAuthenticated, (req, res) => {
         conn.query(getNotes, [userId], (err, mydata) => {
             if (err) throw err;
 
-            console.log("Data Displayed Successfully!");
-            res.render('index.ejs', {
-                title: "PlanITSmart",
-                action: 'list',
-                events: eventData,
-                sampledata: mydata,
-                userName: req.session.user.name,
-                user: req.user // Pass the entire user object
+            conn.query(dates, [userId], (err, dateRows) => {
+                if (err) throw err;
+                
+                // Format the fetched dates
+                const formattedDates = dateRows.map(row => {
+                    const date = new Date(row.startDate);
+                    // Check if the date is valid
+                    if (date instanceof Date && !isNaN(date)) {
+                        return date.toLocaleDateString(undefined, { year: 'numeric', month: '2-digit', day: '2-digit' });
+                    } else {
+                        console.error("Invalid date:", row.startDate);
+                        return null; // or handle invalid date as needed
+                    }
+                }).filter(date => date !== null); // Filter out any invalid dates
+
+                console.log("Fetched Dates:", formattedDates); // Log the formatted dates
+                
+                res.render('index.ejs', {
+                    title: "PlanITSmart",
+                    action: 'list',
+                    events: eventData,
+                    sampledata: mydata,
+                    userName: req.session.user.name,
+                    user: req.user,
+                    date: formattedDates // Pass the formatted dates to the template
+                });
             });
         });
     });
@@ -255,19 +272,14 @@ app.post('/addevent', isAuthenticated, (req, res) => {
     const description = req.body.description;
     const startDate = req.body.startDate;
     const startTime = req.body.startTime;
-    const endDate = req.body.endDate;
     const endTime = req.body.endTime;
 
-    // Validate incoming data
-    if (!title || !startDate || !startTime || !endDate || !endTime) {
-        return res.status(400).send("All fields are required");
-    }
 
     // SQL query to insert the event
-    const sql = `INSERT INTO events (userId, title, description, startDate, startTime, endDate, endTime) VALUES (?, ?, ?, ?, ?, ?, ?)`;
+    const sql = `INSERT INTO events (userId, title, description, startDate, startTime, endTime) VALUES ( ?, ?, ?, ?, ?, ?)`;
     
     // Execute the query
-    conn.query(sql, [userId, title, description, startDate, startTime, endDate, endTime], (err, result) => {
+    conn.query(sql, [userId, title, description, startDate, startTime, endTime], (err, result) => {
         if (err) {
             console.error("Error inserting event:", err);
             return res.status(500).send("Internal Server Error");
@@ -289,8 +301,9 @@ app.post('/addnote', isAuthenticated, (req, res) => {
     const noteDescription = req.body.noteDescription;
     const noteLabel = req.body.noteLabel;
     const dueDate = req.body.dueDate;
+    const reminder =req.body.reminder;
 
-    const sql = `INSERT INTO notes (userId, noteTitle, noteDescription, noteLabel, dueDate) VALUES (?, ?, ?, ?, ?)`;
+    const sql = `INSERT INTO notes (userId, noteTitle, noteDescription, noteLabel, dueDate,reminder) VALUES (?, ?, ?, ?, ?, ?)`;
     
     conn.query(sql, [userId, noteTitle, noteDescription, noteLabel, dueDate], (err, result) => {
         if (err) {
@@ -340,11 +353,10 @@ app.post('/eventoptions/updateevents/:id', isAuthenticated, (req, res) => {
     const description = req.body.description;
     const startDate = req.body.startDate;
     const startTime = req.body.startTime;
-    const endDate = req.body.endDate;
     const endTime = req.body.endTime;
 
-    const toUpdate = `UPDATE events SET title=?, description=?, startDate=?, startTime=?, endDate=?, endTime=? WHERE id = ? AND userId = ?`;
-    conn.query(toUpdate, [title, description, startDate, startTime, endDate, endTime, upd_id, userId], (err, result) => {
+    const toUpdate = `UPDATE events SET title=?, description=?, startDate=?, startTime=?, endTime=? WHERE id = ? AND userId = ?`;
+    conn.query(toUpdate, [title, description, startDate, startTime, endTime, upd_id, userId], (err, result) => {
         if (err) {
             console.error("Error updating event:", err);
             return res.status(500 ).send("Internal Server Error");
@@ -360,7 +372,7 @@ app.post('/eventoptions/updateevents/:id', isAuthenticated, (req, res) => {
 });
 
 // Delete notes
-app.post('/noteoptions/deletenotes/:id', isAuthenticated, (req, res) => {
+app.get('/noteoptions/deletenotes/:id', isAuthenticated, (req, res) => {
     const userId = req.session.user.id;
     const del_id = req.params.id;
 
@@ -381,7 +393,7 @@ app.post('/noteoptions/deletenotes/:id', isAuthenticated, (req, res) => {
 });
 
 // Delete events
-app.post('/eventoptions/deleteevents/:id', isAuthenticated, (req, res) => {
+app.get('/eventoptions/deleteevents/:id', isAuthenticated, (req, res) => {
     const userId = req.session.user.id;
     const del_id = req.params.id;
 
@@ -412,6 +424,7 @@ app.get('/register',(req, res)=>{
 app.get('/updateprofile',(req, res)=>{
     res.render('manageprofile');
 });
+
 
 app.post('/signup', async (req, res) => {
     const signup_name = req.body.signup_name;

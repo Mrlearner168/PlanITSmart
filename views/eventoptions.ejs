@@ -259,15 +259,14 @@
             <div class="row">
               <!-- Bordered Table -->
               <div class="card mb-4">
-                <h5 class="card-header">ERRANDS</h5>
+                <h5 class="card-header">SHEDULE PLAN</h5>
                 <div class="card-body">
                   <div class="table-responsive text-nowrap">
                     <table id="datatablesSimple" class="table table-bordered table-hover">
                       <thead class="table-dark">
                         <tr>
-                          <th>START DATE</th>
+                          <th>DATE</th>
                           <th>START TIME</th>
-                          <th>END DATE</th>
                           <th>END TIME</th>
                           <th>TITLE</th>
                           <th>DESCRIPTION</th>
@@ -281,7 +280,6 @@
                         <tr>
                           <td><%= mydata.startDate %></td>
                           <td><%= mydata.startTime %></td>
-                          <td><%= mydata.endDate %></td>
                           <td><%= mydata.endTime %></td>
                           <td><%= mydata.title %></td>
                           <td><%= mydata.description %></td>
@@ -290,7 +288,7 @@
                               class="btn btn-success">UPDATE</a>
                           </td>
                           <td>
-                            <a href="eventoptions/delete/<%= mydata.id %>" class="btn btn-danger"
+                            <a href="eventoptions/deleteevents/<%= mydata.id %>" class="btn btn-danger"
                               onclick="return confirm('Do you want to remove <%= mydata.title %> ?')">DELETE</a>
                           </td>
                         </tr>
@@ -304,10 +302,10 @@
                                 <h5 class="modal-title" id="exampleModalLabel">Update Event</h5>
                               </div>
                               <div class="modal-body">
-                                <form action="eventoptions/updateevent/<%= mydata.id %>" method="post">
+                                <form action="/eventoptions/updateevents/<%= mydata.id %>" method="post">
                                   <div class="row">
                                     <div class="col">
-                                      <label for="startDate" class="form-label">START DATE</label>
+                                      <label for="startDate" class="form-label">DATE</label>
                                       <input type="date" name="startDate" value="<%= mydata.startDate %>" required
                                         class="form-control" aria-label="startDate">
                                     </div>
@@ -319,11 +317,6 @@
                                     </div>
                                   </div>
                                   <div class="row">
-                                    <div class="col">
-                                      <label for="endDate" class="form-label">END DATE</label>
-                                      <input type="date" name="endDate" value="<%= mydata.endDate %>" required
-                                        class="form-control" aria-label="endDate">
-                                    </div>
                                     <div class="col">
                                       <label for="endTime" class="form-label">END TIME</label>
                                       <input type="time" pattern="^([0-1]?[0-9]|2[0-4]):([0-5][0-9])(:[0-5][0-9])?$"

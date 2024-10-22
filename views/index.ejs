@@ -314,9 +314,8 @@
                     <table class="table table-bordered table-hover ">
                       <thead class="table-dark">
                         <tr>
-                          <th>START DATE</th>
+                          <th>DATE</th>
                           <th>START TIME</th>
-                          <th>END DATE</th>
                           <th>END TIME</th>
                           <th>TITLE</th>
                           <th>DESCRIPTION</th>
@@ -329,7 +328,6 @@
                         <tr>
                           <td><%= event.startDate %></td>
                           <td><%= event.startTime %></td>
-                          <td><%= event.endDate %></td>
                           <td><%= event.endTime %></td>
                           <td><%= event.title %></td>
                           <td><%= event.description %></td>
@@ -377,141 +375,175 @@
                 </div>
               </div>
               <!--/ Bordered Table -->
+              <!-- chart -->
+              <div class="card">
+                <h5 class="card-header">Line Chart</h5>
+                <div class="card-body">
+                  <div class="table-responsive text-nowrap">
+                    <table class="table table-bordered table-hover ">
+                      <thead class="table-light">
+
+                      </thead>
+                      <div id="curve_chart" style="width: 900px; height: 500px"></div>
+                    </table>
+                  </div>
+                </div>
+                </h5>
+              </div>
+              <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+              <script type="text/javascript">
+                google.charts.load('current', {
+                  'packages': ['corechart']
+                });
+                google.charts.setOnLoadCallback(drawChart);
+
+                function drawChart() {
+                  var data = google.visualization.arrayToDataTable([
+                    ['Date', 'Minutes'],
+                    ['2004', 1000, ],
+                    ['2005', 1170, ],
+                    ['2006', 660, ],
+                    ['2007', 1030, ]
+                  ]);
+
+                  var options = {
+                    title: 'Progress',
+                    curveType: 'function',
+                    legend: {
+                      position: 'bottom'
+                    }
+                  };
+
+                  var chart = new google.visualization.LineChart(document.getElementById('curve_chart'));
+
+                  chart.draw(data, options);
+                }
+              </script>
 
 
+              <!-- / Content -->
 
-
-            </div>
-
-
-          </div>
-
-          <!-- / Content -->
-
-          <!-- add modal -->
-          <!-- Modal -->
-          <div class="modal fade" id="addEvent" tabindex="-1" role="dialog" aria-labelledby="addEventLabel"
-            aria-hidden="true">
-            <div class="modal-dialog" role="document">
-              <div class="modal-content">
-                <div class="modal-header">
-                  <h5 class="modal-title" id="addEventLabel">Add Event</h5>
-                  <!-- <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <!-- add modal -->
+              <!-- Modal -->
+              <div class="modal fade" id="addEvent" tabindex="-1" role="dialog" aria-labelledby="addEventLabel"
+                aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title" id="addEventLabel">Add Event</h5>
+                      <!-- <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                 <span aria-hidden="true">&times;</span>
                             </button> -->
-                </div>
-                <div class="modal-body">
-                  <form action="/addevent" method="post">
-                    <div class="row">
-                      <div class="col">
-                        <label for="startDate" class="form-label">START DATE</label>
-                        <input type="date" name="startDate" required class="form-control" aria-label="startDate">
-                      </div>
-                      <div class="col">
-                        <label for="startTime" class="form-label">START TIME</label>
-                        <input type="time" pattern="^([0-1]?[0-9]|2[0-4]):([0-5][0-9])(:[0-5][0-9])?$" name="startTime"
-                          required class="form-control" aria-label="startTime">
-                      </div>
                     </div>
-                    </p>
-                    <div class="row">
-                      <div class="col">
-                        <label for="endDate" class="form-label">END DATE</label>
-                        <input type="date" name="endDate" required class="form-control" aria-label="endDate">
-                      </div>
-                      <div class="col">
-                        <label for="endTime" class="form-label">END TIME</label>
-                        <input type="time" pattern="^([0-1]?[0-9]|2[0-4]):([0-5][0-9])(:[0-5][0-9])?$" name="endTime"
-                          required class="form-control" aria-label="endTime">
-                      </div>
-                    </div>
-                    </p>
-                    <div class="input-group mb-3">
-                      <div class="input-group-prepend">
-                        <span class="input-group-text" id="basic-addon1">TITLE</span>
-                      </div>
-                      <input type="text" name="title" required class="form-control" aria-label="title"
-                        aria-describedby="basic-addon1">
-                    </div>
-                    <div class="input-group">
-                      <div class="input-group-prepend">
-                        <span class="input-group-text">DESCRIPTION</span>
-                      </div>
-                      <textarea required class="form-control" name="description" aria-label="With textarea"></textarea>
-                    </div>
-                    <p></p>
-                    <div class="modal-footer">
+                    <div class="modal-body">
+                      <form action="/addevent" method="post">
+                        <div class="row">
+                          <div class="col">
+                            <label for="startDate" class="form-label">START DATE</label>
+                            <input type="date" name="startDate" required class="form-control" aria-label="startDate">
+                          </div>
+                          <div class="col">
+                            <label for="startTime" class="form-label">START TIME</label>
+                            <input type="time" pattern="^([0-1]?[0-9]|2[0-4]):([0-5][0-9])(:[0-5][0-9])?$"
+                              name="startTime" required class="form-control" aria-label="startTime">
+                          </div>
+                        </div>
+                        </p>
+                        <div class="row">
+                          <div class="col">
+                            <label for="endTime" class="form-label">END TIME</label>
+                            <input type="time" pattern="^([0-1]?[0-9]|2[0-4]):([0-5][0-9])(:[0-5][0-9])?$"
+                              name="endTime" required class="form-control" aria-label="endTime">
+                          </div>
+                        </div>
+                        </p>
+                        <div class="input-group mb-3">
+                          <div class="input-group-prepend">
+                            <span class="input-group-text" id="basic-addon1">TITLE</span>
+                          </div>
+                          <input type="text" name="title" required class="form-control" aria-label="title"
+                            aria-describedby="basic-addon1">
+                        </div>
+                        <div class="input-group">
+                          <div class="input-group-prepend">
+                            <span class="input-group-text">DESCRIPTION</span>
+                          </div>
+                          <textarea required class="form-control" name="description"
+                            aria-label="With textarea"></textarea>
+                        </div>
+                        <p></p>
+                        <div class="modal-footer">
 
-                      <input type="submit" class="btn btn-primary" name="addevent" value="ADD EVENT">
-                    </div>
-                  </form>
+                          <input type="submit" class="btn btn-primary" name="addevent" value="ADD EVENT">
+                        </div>
+                      </form>
 
 
 
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
 
-          <!-- add note -->
-          <!-- Modal -->
-          <div class="modal fade" id="addNote" tabindex="-1" role="dialog" aria-labelledby="addNoteLabel"
-            aria-hidden="true">
-            <div class="modal-dialog" role="document">
-              <div class="modal-content">
-                <div class="modal-header">
-                  <h5 class="modal-title" id="addEventLabel">Add Note</h5>
-                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                  </button>
-                </div>
-                <div class="modal-body">
-                  <form action="/addnote" method="post">
-                    <div class="row">
-                      <div class="input-group mb-3">
-                        <div class="input-group-prepend">
-                          <span class="input-group-text" id="basic-addon1">TITLE</span>
-                        </div>
-                        <input type="text" name="noteTitle" required class="form-control" aria-label="noteTitle"
-                          aria-describedby="basic-addon1">
-                      </div>
-                      <div class="input-group">
-                        <div class="input-group-prepend">
-                          <span class="input-group-text">DESCRIPTION</span>
-                        </div>
-                        <textarea required class="form-control" name="noteDescription"
-                          aria-label="noteDescription"></textarea>
-                      </div>
-                      <p></p>
-                      <div class="col">
-                        <label for="label" class="form-label">LABEL</label>
-                        <input type="text" name="noteLabel" required class="form-control" aria-label="noteLabel">
-                      </div>
-                      <div class="col">
-                        <label for="date" class="form-label">DUE DATE</label>
-                        <input type="date" name="dueDate" required class="form-control" aria-label="dueDate">
-                      </div>
+              <!-- add note -->
+              <!-- Modal -->
+              <div class="modal fade" id="addNote" tabindex="-1" role="dialog" aria-labelledby="addNoteLabel"
+                aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title" id="addEventLabel">Add Note</h5>
+                      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                      </button>
                     </div>
-                    </p>
-                    <div class="modal-footer">
+                    <div class="modal-body">
+                      <form action="/addnote" method="post">
+                        <div class="row">
+                          <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                              <span class="input-group-text" id="basic-addon1">TITLE</span>
+                            </div>
+                            <input type="text" name="noteTitle" required class="form-control" aria-label="noteTitle"
+                              aria-describedby="basic-addon1">
+                          </div>
+                          <div class="input-group">
+                            <div class="input-group-prepend">
+                              <span class="input-group-text">DESCRIPTION</span>
+                            </div>
+                            <textarea required class="form-control" name="noteDescription"
+                              aria-label="noteDescription"></textarea>
+                          </div>
+                          <p></p>
+                          <div class="col">
+                            <label for="label" class="form-label">LABEL</label>
+                            <input type="text" name="noteLabel" required class="form-control" aria-label="noteLabel">
+                          </div>
+                          <div class="col">
+                            <label for="date" class="form-label">DUE DATE</label>
+                            <input type="date" name="dueDate" required class="form-control" aria-label="dueDate">
+                          </div>
+                        </div>
+                        </p>
+                        <div class="modal-footer">
 
-                      <input type="submit" class="btn btn-primary" name="addnote" value="ADD NOTE">
+                          <input type="submit" class="btn btn-primary" name="addnote" value="ADD NOTE">
+                        </div>
+                      </form>
+
+
+
                     </div>
-                  </form>
-
-
-
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
 
-          <!-- Footer -->
-          <footer class="content-footer footer bg-footer-theme">
-            <div class="container-xxl">
-              <div
-                class="footer-container d-flex align-items-center justify-content-between py-4 flex-md-row flex-column">
-                <!-- <div class="text-body">
+              <!-- Footer -->
+              <footer class="content-footer footer bg-footer-theme">
+                <div class="container-xxl">
+                  <div
+                    class="footer-container d-flex align-items-center justify-content-between py-4 flex-md-row flex-column">
+                    <!-- <div class="text-body">
                     ©
                     <script>
                       document.write(new Date().getFullYear());
@@ -519,48 +551,48 @@
                     , made with ❤️ by
                     <a href="https://themeselection.com" target="_blank" class="footer-link">ThemeSelection</a>
                   </div> -->
-              </div>
-            </div>
-          </footer>
-          <!-- / Footer -->
+                  </div>
+                </div>
+              </footer>
+              <!-- / Footer -->
 
-          <div class="content-backdrop fade"></div>
+              <div class="content-backdrop fade"></div>
+            </div>
+
+
+            <!-- Content wrapper -->
+          </div>
+          <!-- / Layout page -->
         </div>
 
-
-        <!-- Content wrapper -->
+        <!-- Overlay -->
+        <div class="layout-overlay layout-menu-toggle"></div>
       </div>
-      <!-- / Layout page -->
-    </div>
-
-    <!-- Overlay -->
-    <div class="layout-overlay layout-menu-toggle"></div>
-  </div>
-  <!-- / Layout wrapper -->
+      <!-- / Layout wrapper -->
 
 
-  <!-- Core JS -->
-  <!-- build:js vendor/js/core.js -->
+      <!-- Core JS -->
+      <!-- build:js vendor/js/core.js -->
 
-  <script src="vendor/libs/jquery/jquery.js"></script>
-  <script src="vendor/libs/popper/popper.js"></script>
-  <script src="vendor/js/bootstrap.js"></script>
-  <script src="vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
-  <script src="vendor/js/menu.js"></script>
+      <script src="vendor/libs/jquery/jquery.js"></script>
+      <script src="vendor/libs/popper/popper.js"></script>
+      <script src="vendor/js/bootstrap.js"></script>
+      <script src="vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
+      <script src="vendor/js/menu.js"></script>
 
-  <!-- endbuild -->
+      <!-- endbuild -->
 
-  <!-- Vendors JS -->
-  <script src="vendor/libs/apex-charts/apexcharts.js"></script>
+      <!-- Vendors JS -->
+      <script src="vendor/libs/apex-charts/apexcharts.js"></script>
 
-  <!-- Main JS -->
-  <script src="js/main.js"></script>
+      <!-- Main JS -->
+      <script src="js/main.js"></script>
 
-  <!-- Page JS -->
-  <script src="js/dashboards-analytics.js"></script>
+      <!-- Page JS -->
+      <script src="js/dashboards-analytics.js"></script>
 
-  <!-- Place this tag before closing body tag for github widget button. -->
-  <script async defer src="https://buttons.github.io/buttons.js"></script>
+      <!-- Place this tag before closing body tag for github widget button. -->
+      <script async defer src="https://buttons.github.io/buttons.js"></script>
 </body>
 
 </html>
