@@ -46,6 +46,7 @@
   <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
   <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
   <script src="js/config.js"></script>
+
 </head>
 
 <body>
@@ -376,50 +377,58 @@
               </div>
               <!--/ Bordered Table -->
               <!-- chart -->
+              <hr class="my-12" />
+              <!-- Bordered Table -->
               <div class="card">
                 <h5 class="card-header">Line Chart</h5>
                 <div class="card-body">
                   <div class="table-responsive text-nowrap">
                     <table class="table table-bordered table-hover ">
                       <thead class="table-light">
+                        <script type="text/javascript" src="js/loader.js"></script>
+                        <script type="text/javascript">
+                          google.charts.load('current', {'packages':['corechart']});
+                          google.charts.setOnLoadCallback(drawChart);
+                        
+                          function formatData(input) {
+                             // Remove the escaping backslashes and parse the string as JSON
+                            const cleanedInput = input.replace(/\\/g, ''); // Remove backslashes
+                            const formattedArray = JSON.parse(cleanedInput); // Parse the cleaned string
+                                                    
+                             return formattedArray;
+                          }
 
+                          // Example usage
+                          const input = "[[\\\"Date\\\",\\\" \\\"],[\\\"10/17/2024\\\",240],[\\\"10/02/2024\\\",60],[\\\"10/03/2024\\\",1322],[\\\"10/14/2024\\\",1430],[\\\"10/02/2024\\\",1438],[\\\"10/22/2024\\\",1437],[\\\"10/22/2024\\\",1257],[\\\"10/09/2024\\\",1439],[\\\"10/02/2024\\\",1437],[\\\"10/03/2024\\\",1437],[\\\"10/22/2024\\\",1260]]";
+
+                          const result = formatData(input);
+                          console.log(result);
+
+
+                          function drawChart() {
+                           var data = google.visualization.arrayToDataTable(result);
+
+                           var options = {
+                             title: 'SCHEDULE PROGRESS',
+                              curveType: 'function',
+                              legend: { position: 'bottom' },
+                               hAxis: { title: 'Date (MM/dd/yyyy)' },
+                               vAxis: { title: 'Minutes' }
+                            };
+
+                            var chart = new google.visualization.LineChart(document.getElementById('curve_chart'));
+
+                            chart.draw(data, options);
+                          }
+                        </script>
                       </thead>
-                      <div id="curve_chart" style="width: 900px; height: 500px"></div>
+                      <tbody>
+                        <div id="curve_chart" style="width: 900px; height: 500px"></div>
+                      </tbody>
                     </table>
                   </div>
                 </div>
-                </h5>
               </div>
-              <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-              <script type="text/javascript">
-                google.charts.load('current', {
-                  'packages': ['corechart']
-                });
-                google.charts.setOnLoadCallback(drawChart);
-
-                function drawChart() {
-                  var data = google.visualization.arrayToDataTable([
-                    ['Date', 'Minutes'],
-                    ['2004', 1000, ],
-                    ['2005', 1170, ],
-                    ['2006', 660, ],
-                    ['2007', 1030, ]
-                  ]);
-
-                  var options = {
-                    title: 'Progress',
-                    curveType: 'function',
-                    legend: {
-                      position: 'bottom'
-                    }
-                  };
-
-                  var chart = new google.visualization.LineChart(document.getElementById('curve_chart'));
-
-                  chart.draw(data, options);
-                }
-              </script>
-
 
               <!-- / Content -->
 
@@ -439,7 +448,7 @@
                       <form action="/addevent" method="post">
                         <div class="row">
                           <div class="col">
-                            <label for="startDate" class="form-label">START DATE</label>
+                            <label for="startDate" class="form-label">DATE</label>
                             <input type="date" name="startDate" required class="form-control" aria-label="startDate">
                           </div>
                           <div class="col">
@@ -484,6 +493,7 @@
                   </div>
                 </div>
               </div>
+
 
               <!-- add note -->
               <!-- Modal -->
@@ -557,7 +567,7 @@
               <!-- / Footer -->
 
               <div class="content-backdrop fade"></div>
-            </div>
+            </di>
 
 
             <!-- Content wrapper -->

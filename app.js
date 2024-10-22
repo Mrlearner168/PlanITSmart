@@ -145,6 +145,7 @@ app.get('/', isAuthenticated, (req, res) => {
     const getEvents = `SELECT * FROM events WHERE userId = ?`;
     const getNotes = `SELECT * FROM notes WHERE userId = ?`;
     const dates = `SELECT startDate FROM events WHERE userId = ?`;
+    const time = `SELECT startTime, endTime FROM events WHERE userId = ?`;
 
     conn.query(getEvents, [userId], (err, eventData) => {
         if (err) throw err;
@@ -154,34 +155,76 @@ app.get('/', isAuthenticated, (req, res) => {
 
             conn.query(dates, [userId], (err, dateRows) => {
                 if (err) throw err;
-                
-                // Format the fetched dates
-                const formattedDates = dateRows.map(row => {
-                    const date = new Date(row.startDate);
-                    // Check if the date is valid
-                    if (date instanceof Date && !isNaN(date)) {
-                        return date.toLocaleDateString(undefined, { year: 'numeric', month: '2-digit', day: '2-digit' });
-                    } else {
-                        console.error("Invalid date:", row.startDate);
-                        return null; // or handle invalid date as needed
-                    }
-                }).filter(date => date !== null); // Filter out any invalid dates
 
-                console.log("Fetched Dates:", formattedDates); // Log the formatted dates
+                conn.query(time, [userId], (err, timedata) => {
+                    if (err) throw err;
+
+                    // Calculate minutes for each event
+                    const getMinutesDifference = (startTime, endTime) => {
+                        const startParts = startTime.split(':').map(Number);
+                        const endParts = endTime.split(':').map(Number);
+
+                        const startDate = new Date();
+                        startDate.setHours(startParts[0], startParts[1], startParts[2]);
+
+                        const endDate = new Date();
+                        endDate.setHours(endParts[0], endParts[1], endParts[2]);
+
+                        // If end time is earlier than start time, assume it is the next day
+                        if (endDate < startDate) {
+                            endDate.setDate(endDate.getDate() + 1);
+                        }
+
+                        const differenceInMillis = endDate - startDate;
+                        return Math.floor(differenceInMillis / (1000 * 60)); // Convert to minutes
+                    };
+
+                    // Calculate minutes for each event in the timedata
+                    const minutesData = timedata.map(item => {
+                        return getMinutesDifference(item.startTime, item.endTime);
+                    });
+
+                    // Format the fetched dates
+                    const formattedDates = dateRows.map(row => {
+                        const date = new Date(row.startDate);
+                        // Check if the date is valid
+                        if (date instanceof Date && !isNaN(date)) {
+                            return date.toLocaleDateString(undefined, { year: 'numeric', month: '2-digit', day: '2-digit' });
+                        } else {
+                            console.error("Invalid date:", row.startDate);
+                            return null; // or handle invalid date as needed
+                        }
+                    }).filter(date => date !== null);
                 
-                res.render('index.ejs', {
-                    title: "PlanITSmart",
-                    action: 'list',
-                    events: eventData,
-                    sampledata: mydata,
-                    userName: req.session.user.name,
-                    user: req.user,
-                    date: formattedDates // Pass the formatted dates to the template
+                    // Fetched Dates
+                    const fetchedDates = formattedDates;
+
+                    // Create the formatted data array
+                    const formattedData = [['Date', 'Minutes']].concat(
+                        fetchedDates.map((date, index) => [date, minutesData[index]])
+                    );
+
+                    // Output the formatted data
+                    console.log(formattedData);
+                    const formatdata = JSON.stringify(formattedData);
+
+                    // Render the dashboard with the calculated data
+                    res.render('index.ejs', {
+                        title: "PlanITSmart",
+                        action: 'list',
+                        events: eventData,
+                        sampledata: mydata,
+                        userName: req.session.user.name,
+                        user: req.user,
+                        formattedData: formatdata
+                    });
                 });
             });
         });
     });
 });
+  
+  
 
 
 // Route to handle profile update
@@ -261,6 +304,7 @@ app.get('/eventoptions', isAuthenticated, (req, res) => {
 
 
 // Insert event
+// Insert event
 app.post('/addevent', isAuthenticated, (req, res) => {
     // Check if the user is authenticated and retrieve userId from session
     if (!req.session.user || !req.session.user.id) {
@@ -274,9 +318,8 @@ app.post('/addevent', isAuthenticated, (req, res) => {
     const startTime = req.body.startTime;
     const endTime = req.body.endTime;
 
-
     // SQL query to insert the event
-    const sql = `INSERT INTO events (userId, title, description, startDate, startTime, endTime) VALUES ( ?, ?, ?, ?, ?, ?)`;
+    const sql = `INSERT INTO events (userId, title, description, startDate, startTime, endTime) VALUES (?, ?, ?, ?, ?, ?)`;
     
     // Execute the query
     conn.query(sql, [userId, title, description, startDate, startTime, endTime], (err, result) => {
