@@ -1,4 +1,5 @@
-html,body {
+html,
+body {
 	height: 100%;
 }
 
@@ -8,18 +9,19 @@ body.my-login-page {
 }
 
 .my-login-page .brand {
-	width: 90px;
-	height: 90px;
+	width: 400px;
+	height: 280px;
 	overflow: hidden;
-	border-radius: 50%;
-	margin: 40px auto;
-	box-shadow: 0 4px 8px rgba(0,0,0,.05);
+	border-radius: 90%;
+
+	box-shadow: 0 10px 10px rgba(0, 0, 0, .05);
 	position: relative;
 	z-index: 1;
 }
 
 .my-login-page .brand img {
 	width: 100%;
+	height: 100%;
 }
 
 .my-login-page .card-wrapper {
@@ -28,7 +30,7 @@ body.my-login-page {
 
 .my-login-page .card {
 	border-color: transparent;
-	box-shadow: 0 4px 8px rgba(0,0,0,.05);
+	box-shadow: 0 4px 8px rgba(0, 0, 0, .05);
 }
 
 .my-login-page .card.fat {

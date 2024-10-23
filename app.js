@@ -218,7 +218,6 @@ app.get('/', isAuthenticated, (req, res) => {
 
                     // Output the formatted data
                     console.log(formattedData);
-                    const formatdata = formattedData;
 
                     // Render the dashboard with the calculated data
                     res.render('index.ejs', {
@@ -228,7 +227,7 @@ app.get('/', isAuthenticated, (req, res) => {
                         sampledata: mydata,
                         userName: req.session.user.name,
                         user: req.user,
-                        formattedData: formatdata
+                        formattedData: formattedData
                     });
                 });
             });
@@ -239,22 +238,101 @@ app.get('/', isAuthenticated, (req, res) => {
   
 
 //  charts
-app.get('/charts', isAuthenticated, (req, res) => {
-    // Check if userId exists in users table (for debugging)
-    const checkUser_Sql = `SELECT * FROM users WHERE userId = ?`;
+    app.get('/charts', isAuthenticated, (req, res) => {
     const userId = req.session.user.id;
-    conn.query(checkUser_Sql, [userId], (err, userName) => {
+    const getEvents = `SELECT * FROM events WHERE userId = ?`;
+    const getNotes = `SELECT * FROM notes WHERE userId = ?`;
+    const dates = `SELECT startDate FROM events WHERE userId = ?`;
+    const time = `SELECT startTime, endTime FROM events WHERE userId = ?`;
+
+    conn.query(getEvents, [userId], (err, eventData) => {
         if (err) {
-            console.error("Error checking user:", err);
+            console.error("Error fetching events:", err);
             return res.status(500).send("Internal Server Error");
         }
-    res.render('chart.ejs', {
-        title: "Charts",
-        userName: req.session.user.name,
-        sample2: userName
+
+        conn.query(getNotes, [userId], (err, mydata) => {
+            if (err) {
+                console.error("Error fetching notes:", err);
+                return res.status(500).send("Internal Server Error");
+            }
+
+            conn.query(dates, [userId], (err, dateRows) => {
+                if (err) {
+                    console.error("Error fetching dates:", err);
+                    return res.status(500).send("Internal Server Error");
+                }
+
+                conn.query(time, [userId], (err, timedata) => {
+                    if (err) {
+                        console.error("Error fetching time data:", err);
+                        return res.status(500).send("Internal Server Error");
+                    }
+
+                    // Calculate minutes for each event
+                    const getMinutesDifference = (startTime, endTime) => {
+                        const startParts = startTime.split(':').map(Number);
+                        const endParts = endTime.split(':').map(Number);
+
+                        const startDate = new Date();
+                        startDate.setHours(startParts[0], startParts[1], startParts[2]);
+
+                        const endDate = new Date();
+                        endDate.setHours(endParts[0], endParts[1], endParts[2]);
+
+                        // If end time is earlier than start time, assume it is the next day
+                        if (endDate < startDate) {
+                            endDate.setDate(endDate.getDate() + 1);
+                        }
+
+                        const differenceInMillis = endDate - startDate;
+                        return Math.floor(differenceInMillis / (1000 * 60)); // Convert to minutes
+                    };
+
+                    // Calculate minutes for each event in the timedata
+                    const minutesData = timedata.map(item => {
+                        return getMinutesDifference(item.startTime, item.endTime);
+                    });
+
+                    // Format the fetched dates
+                    const formattedDates = dateRows.map(row => {
+                        const date = new Date(row.startDate);
+                        // Check if the date is valid
+                        if (date instanceof Date && !isNaN(date)) {
+                            return date.toLocaleDateString(undefined, { year: 'numeric', month: '2-digit', day: '2-digit' });
+                        } else {
+                            console.error("Invalid date:", row.startDate);
+                            return null; // or handle invalid date as needed
+                        }
+                    }).filter(date => date !== null);
+                
+                    // Fetched Dates
+                    const fetchedDates = formattedDates;
+
+                    // Create the formatted data array
+                    const formattedData = [['Date', 'Minutes']].concat(
+                        fetchedDates.map((date, index) => [date, minutesData[index]])
+                    );
+
+                    // Output the formatted data
+                    console.log(formattedData);
+
+                    // Render the dashboard with the calculated data
+                    res.render('chart', {
+                        title: "PlanITSmart",
+                        action: 'list',
+                        events: eventData,
+                        sampledata: mydata,
+                        userName: req.session.user.name,
+                        user: req.user,
+                        formattedData: formattedData
+                    });
+                });
+            });
+        });
     });
-});// This will render anotherFile.ejs
 });
+
 
 
 // Route to handle profile update
