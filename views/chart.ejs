@@ -8,7 +8,7 @@
   <meta name="viewport"
     content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
 
-  <title><%=title%></title>
+  <title> charts </title>
 
   <!-- print -->
   <script>
@@ -45,7 +45,6 @@
   <script src="vendor/js/helpers.js"></script>
   <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
   <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
-  <script src="js/config.js"></script>
 
 </head>
 
@@ -217,7 +216,7 @@
                           </div>
                         </div>
                         <div class="flex-grow-1">
-                          <h6 class="mb-0">Welcome,<br> <%= userName %>!</h6>
+                          <h6 class="mb-0">Welcome,<br> <%=userName%> !</h6>
                           <small class="text-muted">User</small>
                         </div>
                       </div>
@@ -243,45 +242,7 @@
                     </a>
                   </li>
                   <!-- Update Profile Modal -->
-                  <div class="modal fade" id="updateProfileModal" tabindex="-1"
-                    aria-labelledby="updateProfileModalLabel" aria-hidden="true">
-                    <div class="modal-dialog">
-                      <div class="modal-content">
-                        <div class="modal-header">
-                          <h5 class="modal-title" id="updateProfileModalLabel">Update Profile</h5>
-                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                          <form action="/updateprofile" method="post">
-                            <div class="mb-3">
-                              <label for="updateName" class="form-label">Name</label>
-                              <input type="text" class="form-control" id="updateName" name="name"
-                                value="<%= user.name %>" required>
-                            </div>
-                            <div class="mb-3">
-                              <label for="updateEmail" class="form-label">Email</label>
-                              <input type="email" class="form-control" id="updateEmail" name="email"
-                                value="<%= user.email %>" required>
-                            </div>
-                            <div class="mb-3">
-                              <label for="updatePassword" class="form-label">New Password</label>
-                              <input type="password" class="form-control" id="updatePassword" name="password"
-                                placeholder="Leave blank to keep current password">
-                            </div>
-                            <div class="mb-3">
-                              <label for="confirmPassword" class="form-label">Confirm New Password</label>
-                              <input type="password" class="form-control" id="confirmPassword" name="confirmPassword"
-                                placeholder="Confirm new password">
-                            </div>
-                            <div class="modal-footer">
-                              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                              <button type="submit" class="btn btn-primary">Save changes</button>
-                            </div>
-                          </form>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                  
                   <script>
                     function clearSessionAndLogout() {
                       // Clear session storage
@@ -300,70 +261,60 @@
 
         <!-- / Navbar -->
 
-        <!-- Content wrapper -->
         <div class="content-wrapper">
           <!-- Content -->
           <div class="container-xxl flex-grow-1 container-p-y">
             <div class="row">
 
-              <!-- Bordered Table -->
               <div class="card">
-                <h5 class="card-header">Line Chart</h5>
+                <h5 class="card-header">Area Chart</h5>
                 <div class="card-body">
                   <div class="table-responsive text-nowrap">
-                    <table class="table table-bordered table-hover ">
                       <thead class="table-light">
-                        <script type="text/javascript" src="js/loader.js"></script>
-                        <script type="text/javascript">
-                          google.charts.load('current', {'packages':['corechart']});
-                          google.charts.setOnLoadCallback(drawChart);
+                        <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
                         
-                          function formatData(input) {
-                             // Remove the escaping backslashes and parse the string as JSON
-                            const cleanedInput = input.replace(/\\/g, ''); // Remove backslashes
-                            const formattedArray = JSON.parse(cleanedInput); // Parse the cleaned string
-                                                    
-                             return formattedArray;
-                          }
+                       <!-- In your HTML -->
+                      <div id="chart_div" 
+                      data-chart-info='<%- JSON.stringify(formattedData) %>'
+                      style="width: 100%; height: 500px;">
+                      </div>
 
+                      <script type="text/javascript">
+                      google.charts.load('current', {'packages':['corechart']});
+                      google.charts.setOnLoadCallback(initializeChart);
+                      
+                      function initializeChart() {
+                         const chartElement = document.getElementById('chart_div');
+                         const chartData = JSON.parse(chartElement.dataset.chartInfo || '[]');
+                      
+                         if (chartData.length > 0) {
+                             drawChart(chartData);
+                         } else {
+                             chartElement.innerHTML = "No data available";
+                         }
+                      }
 
-
-                          // Example usage
-                          const input = "[[\\\"Date\\\",\\\" \\\"],[\\\"10/17/2024\\\",240],[\\\"10/02/2024\\\",60],[\\\"10/03/2024\\\",1322],[\\\"10/14/2024\\\",1430],[\\\"10/02/2024\\\",1438],[\\\"10/22/2024\\\",1437],[\\\"10/22/2024\\\",1257],[\\\"10/09/2024\\\",1439],[\\\"10/02/2024\\\",1437],[\\\"10/03/2024\\\",1437],[\\\"10/22/2024\\\",1260]]";
-
-                          const result = formatData(input);
-                          console.log(result);
-
-
-                          function drawChart() {
-                           var data = google.visualization.arrayToDataTable(result);
-
-                           var options = {
-                             title: 'SCHEDULE PROGRESS',
-                              curveType: 'function',
-                              legend: { position: 'bottom' },
-                               hAxis: { title: 'Date (MM/dd/yyyy)' },
-                               vAxis: { title: 'Minutes' }
-                            };
-
-                            var chart = new google.visualization.LineChart(document.getElementById('curve_chart'));
-
-                            chart.draw(data, options);
-                          }
-                        </script>
+                      function drawChart(data) {
+                         var formattedData = google.visualization.arrayToDataTable(data);
+                         var options = {
+                             title: 'Day Schedule Progress',
+                             hAxis: {title: 'Date(Month, Day, Year)', titleTextStyle: {color: '#333'}},
+                             vAxis: {minValue: 0}
+                         };
+                         var chart = new google.visualization.AreaChart(document.getElementById('chart_div'));
+                         chart.draw(formattedData, options);
+                      }
+                      </script>                 
                       </thead>
                       <tbody>
-                        <div id="curve_chart" style="width: 900px; height: 500px"></div>
+
+                        <div id="chart_div" style="width: 100%; height: 500px;"></div>
                       </tbody>
-                    </table>
+                    
                   </div>
                 </div>
               </div>
 
-              <!-- / Content -->
-
-              <!-- add modal -->
-              <!-- Modal -->
               <div class="modal fade" id="addEvent" tabindex="-1" role="dialog" aria-labelledby="addEventLabel"
                 aria-hidden="true">
                 <div class="modal-dialog" role="document">
@@ -530,6 +481,7 @@
 
       <!-- Place this tag before closing body tag for github widget button. -->
       <script async defer src="https://buttons.github.io/buttons.js"></script>
+      <div id="chart_div" style="width: 100%; height: 500px;"></div>
 </body>
 
 </html>

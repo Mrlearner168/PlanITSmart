@@ -380,59 +380,58 @@
               <hr class="my-12" />
               <!-- Bordered Table -->
               <div class="card">
-                <h5 class="card-header">Line Chart</h5>
+                <h5 class="card-header">Area Chart</h5>
                 <div class="card-body">
                   <div class="table-responsive text-nowrap">
-                    <table class="table table-bordered table-hover ">
                       <thead class="table-light">
-                        <script type="text/javascript" src="js/loader.js"></script>
-                        <script type="text/javascript">
-                          google.charts.load('current', {'packages':['corechart']});
-                          google.charts.setOnLoadCallback(drawChart);
+                        <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
                         
-                          function formatData(input) {
-                             // Remove the escaping backslashes and parse the string as JSON
-                            const cleanedInput = input.replace(/\\/g, ''); // Remove backslashes
-                            const formattedArray = JSON.parse(cleanedInput); // Parse the cleaned string
-                                                    
-                             return formattedArray;
-                          }
-
-
-
-                          // Example usage
-                          const input = "[[\\\"Date\\\",\\\" \\\"],[\\\"10/17/2024\\\",240],[\\\"10/02/2024\\\",60],[\\\"10/03/2024\\\",1322],[\\\"10/14/2024\\\",1430],[\\\"10/02/2024\\\",1438],[\\\"10/22/2024\\\",1437],[\\\"10/22/2024\\\",1257],[\\\"10/09/2024\\\",1439],[\\\"10/02/2024\\\",1437],[\\\"10/03/2024\\\",1437],[\\\"10/22/2024\\\",1260]]";
-
-                          const result = formatData(input);
-                          console.log(result);
-
-
-                          function drawChart() {
-                           var data = google.visualization.arrayToDataTable(result);
-
-                           var options = {
-                             title: 'SCHEDULE PROGRESS',
-                              curveType: 'function',
-                              legend: { position: 'bottom' },
-                               hAxis: { title: 'Date (MM/dd/yyyy)' },
-                               vAxis: { title: 'Minutes' }
-                            };
-
-                            var chart = new google.visualization.LineChart(document.getElementById('curve_chart'));
-
-                            chart.draw(data, options);
-                          }
-                        </script>
+                       <!-- In your HTML -->
+                      <div id="chart_div" 
+                      data-chart-info='<%- JSON.stringify(formattedData) %>'
+                      style="width: 100%; height: 500px;">
+                      </div>
+                      
+                      <script type="text/javascript">
+                      google.charts.load('current', {'packages':['corechart']});
+                      google.charts.setOnLoadCallback(initializeChart);
+                      
+                      function initializeChart() {
+                         const chartElement = document.getElementById('chart_div');
+                         const chartData = JSON.parse(chartElement.dataset.chartInfo || '[]');
+                      
+                         if (chartData.length > 0) {
+                             drawChart(chartData);
+                         } else {
+                             chartElement.innerHTML = "No data available";
+                         }
+                      }
+                      
+                      function drawChart(data) {
+                         var formattedData = google.visualization.arrayToDataTable(data);
+                         var options = {
+                             title: 'Day Schedule Progress',
+                             hAxis: {title: 'Data(Month ,Day , Year)', titleTextStyle: {color: '#333'}},
+                             vAxis: {minValue: 0}
+                         };
+                         var chart = new google.visualization.AreaChart(document.getElementById('chart_div'));
+                         chart.draw(formattedData, options);
+                      }
+                      </script>                 
                       </thead>
                       <tbody>
-                        <div id="curve_chart" style="width: 900px; height: 500px"></div>
+
+                        <div id="chart_div" style="width: 100%; height: 500px;"></div>
                       </tbody>
-                    </table>
+                    
                   </div>
                 </div>
               </div>
 
-              <!-- / Content -->
+
+              <!-- Overlay -->
+              <div class="layout-overlay layout-menu-toggle"></div>
+            </div>
 
               <!-- add modal -->
               <!-- Modal -->
@@ -566,7 +565,6 @@
               <!-- / Footer -->
 
               <div class="content-backdrop fade"></div>
-            </di>
 
 
             <!-- Content wrapper -->

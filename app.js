@@ -217,7 +217,7 @@ app.get('/', isAuthenticated, (req, res) => {
                     );
 
                     // Output the formatted data
-                    console.log(formattedData);
+                    // console.log(formattedData);
 
                     // Render the dashboard with the calculated data
                     res.render('index.ejs', {
@@ -235,10 +235,9 @@ app.get('/', isAuthenticated, (req, res) => {
     });
 });
   
-  
 
 //  charts
-    app.get('/charts', isAuthenticated, (req, res) => {
+    app.get('/charts', isAuthenticated, async(req, res) => {
     const userId = req.session.user.id;
     const getEvents = `SELECT * FROM events WHERE userId = ?`;
     const getNotes = `SELECT * FROM notes WHERE userId = ?`;
@@ -333,7 +332,58 @@ app.get('/', isAuthenticated, (req, res) => {
     });
 });
 
+// charts route
+app.get('/charts', isAuthenticated, async (req, res) => {
+    const userId = req.session.user.id;
+    const getEvents = `SELECT * FROM events WHERE userId = ?`;
+    const datesQuery = `SELECT startDate, startTime, endTime FROM events WHERE userId = ?`;
 
+    conn.query(getEvents, [userId], (err, eventData) => {
+        if (err) {
+            console.error("Error fetching events:", err);
+            return res.status(500).send("Internal Server Error");
+        }
+
+        // Fetch dates and times for the chart
+        conn.query(datesQuery, [userId], (err, dateRows) => {
+            if (err) {
+                console.error("Error fetching dates:", err);
+                return res.status(500).send("Internal Server Error");
+            }
+
+            // Calculate minutes for each event
+            const getMinutesDifference = (startTime, endTime) => {
+                const startParts = startTime.split(':').map(Number);
+                const endParts = endTime.split(':').map(Number);
+
+                const startDate = new Date();
+                startDate.setHours(startParts[0], startParts[1], startParts[2]);
+
+                const endDate = new Date();
+                endDate.setHours(endParts[0], endParts[1], endParts[2]);
+
+                // If end time is earlier than start time, assume it is the next day
+                if (endDate < startDate) {
+                    endDate.setDate(endDate.getDate() + 1);
+                }
+
+                const differenceInMillis = endDate - startDate;
+                return Math.floor(differenceInMillis / (1000 * 60)); // Convert to minutes
+            };
+
+            // Prepare the data for the chart
+            const chartData = [['Year', 'Sales']]; // Header for the chart data
+            dateRows.forEach(row => {
+                const formattedDate = new Date(row.startDate).getFullYear(); // Extract the year from the startDate
+                const minutes = getMinutesDifference(row.startTime, row.endTime); // Calculate minutes
+                chartData.push([formattedDate, minutes]); // Push year and minutes into the chartData array
+            });
+
+            // Render the chart.ejs file with the formatted data
+            res.render('chart', { title: 'Company Performance', chartData });
+        });
+    });
+});
 
 // Route to handle profile update
 app.post('/updateprofile', isAuthenticated, async (req, res) => {
