@@ -1,12 +1,12 @@
 {
-  "name": "academic-calendar-organizer-main",
+  "name": "PlanITSmart",
   "version": "1.0.0",
   "description": "",
   "main": "app.js",
   "scripts": {
     "start": "nodemon app"
   },
-  "author": "",
+  "author": "Mrlearner168",
   "license": "ISC",
   "dependencies": {
     "bcrypt": "^5.1.1",
