@@ -218,16 +218,50 @@ app.get('/', isAuthenticated, (req, res) => {
 
                     // Output the formatted data
                     // console.log(formattedData);
+                    function aggregateAndSortMinutes(data) {
+                        // Create an object to hold the total minutes for each date
+                        const minutesByDate = {};
+                    
+                        // Iterate through the data (skip the header)
+                        for (let i = 1; i < data.length; i++) {
+                            const date = data[i][0];
+                            const minutes = data[i][1];
+                    
+                            // If the date already exists, add the minutes; otherwise, initialize it
+                            if (minutesByDate[date]) {
+                                minutesByDate[date] += minutes;
+                            } else {
+                                minutesByDate[date] = minutes;
+                            }
+                        }
+                    
+                        // Convert the object back to an array and sort by date
+                        const aggregatedData = [['Date', 'Minutes']]; // Initialize with the header
+                        for (const date in minutesByDate) {
+                            aggregatedData.push([date, minutesByDate[date]]);
+                        }
+                    
+                        // Sort the aggregated data by date (the first column)
+                        aggregatedData.sort((a, b) => new Date(a[0]) - new Date(b[0]));
+                    
+                        return aggregatedData;
+                    }
+                    
+                    // Example usage
+                    const modifiedformattedData = formattedData;
+                    
+                    const result = aggregateAndSortMinutes(formattedData);
+                    console.log(result);
 
                     // Render the dashboard with the calculated data
-                    res.render('index.ejs', {
+                    res.render('index', {
                         title: "PlanITSmart",
                         action: 'list',
                         events: eventData,
                         sampledata: mydata,
                         userName: req.session.user.name,
                         user: req.user,
-                        formattedData: formattedData
+                        modifiedformattedData: result
                     });
                 });
             });
@@ -316,6 +350,43 @@ app.get('/', isAuthenticated, (req, res) => {
                     // Output the formatted data
                     console.log(formattedData);
 
+
+
+                    function aggregateAndSortMinutes(data) {
+                        // Create an object to hold the total minutes for each date
+                        const minutesByDate = {};
+                    
+                        // Iterate through the data (skip the header)
+                        for (let i = 1; i < data.length; i++) {
+                            const date = data[i][0];
+                            const minutes = data[i][1];
+                    
+                            // If the date already exists, add the minutes; otherwise, initialize it
+                            if (minutesByDate[date]) {
+                                minutesByDate[date] += minutes;
+                            } else {
+                                minutesByDate[date] = minutes;
+                            }
+                        }
+                    
+                        // Convert the object back to an array and sort by date
+                        const aggregatedData = [['Date', 'Minutes']]; // Initialize with the header
+                        for (const date in minutesByDate) {
+                            aggregatedData.push([date, minutesByDate[date]]);
+                        }
+                    
+                        // Sort the aggregated data by date (the first column)
+                        aggregatedData.sort((a, b) => new Date(a[0]) - new Date(b[0]));
+                    
+                        return aggregatedData;
+                    }
+                    
+                    // Example usage
+                    const modifiedformattedData = formattedData;
+                    
+                    const result = aggregateAndSortMinutes(formattedData);
+                    console.log(result);
+
                     // Render the dashboard with the calculated data
                     res.render('chart', {
                         title: "PlanITSmart",
@@ -324,7 +395,7 @@ app.get('/', isAuthenticated, (req, res) => {
                         sampledata: mydata,
                         userName: req.session.user.name,
                         user: req.user,
-                        formattedData: formattedData
+                        modifiedformattedData: result
                     });
                 });
             });
@@ -332,100 +403,10 @@ app.get('/', isAuthenticated, (req, res) => {
     });
 });
 
-// charts route
-app.get('/charts', isAuthenticated, async (req, res) => {
-    const userId = req.session.user.id;
-    const getEvents = `SELECT * FROM events WHERE userId = ?`;
-    const datesQuery = `SELECT startDate, startTime, endTime FROM events WHERE userId = ?`;
-
-    conn.query(getEvents, [userId], (err, eventData) => {
-        if (err) {
-            console.error("Error fetching events:", err);
-            return res.status(500).send("Internal Server Error");
-        }
-
-        // Fetch dates and times for the chart
-        conn.query(datesQuery, [userId], (err, dateRows) => {
-            if (err) {
-                console.error("Error fetching dates:", err);
-                return res.status(500).send("Internal Server Error");
-            }
-
-            // Calculate minutes for each event
-            const getMinutesDifference = (startTime, endTime) => {
-                const startParts = startTime.split(':').map(Number);
-                const endParts = endTime.split(':').map(Number);
-
-                const startDate = new Date();
-                startDate.setHours(startParts[0], startParts[1], startParts[2]);
-
-                const endDate = new Date();
-                endDate.setHours(endParts[0], endParts[1], endParts[2]);
-
-                // If end time is earlier than start time, assume it is the next day
-                if (endDate < startDate) {
-                    endDate.setDate(endDate.getDate() + 1);
-                }
-
-                const differenceInMillis = endDate - startDate;
-                return Math.floor(differenceInMillis / (1000 * 60)); // Convert to minutes
-            };
-
-            // Prepare the data for the chart
-            const chartData = [['Year', 'Sales']]; // Header for the chart data
-            dateRows.forEach(row => {
-                const formattedDate = new Date(row.startDate).getFullYear(); // Extract the year from the startDate
-                const minutes = getMinutesDifference(row.startTime, row.endTime); // Calculate minutes
-                chartData.push([formattedDate, minutes]); // Push year and minutes into the chartData array
-            });
-
-            // Render the chart.ejs file with the formatted data
-            res.render('chart', { title: 'Company Performance', chartData });
-        });
-    });
-});
-
-// Route to handle profile update
-app.post('/updateprofile', isAuthenticated, async (req, res) => {
-    const { name, email, password, confirmPassword } = req.body;
-    const userId = req.session.user.id;
-
-    // Start with basic validation
-    if (password !== confirmPassword) {
-        return res.status(400).send("Passwords do not match");
-    }
-
-    try {
-        let updateFields = { name, email };
-        let updateQuery = 'UPDATE users SET ? WHERE userId = ?';
-
-        if (password) {
-            const hashedPassword = await bcrypt.hash(password, 10);
-            updateFields.password = hashedPassword;
-        }
-
-        conn.query(updateQuery, [updateFields, userId], (err, result) => {
-            if (err) {
-                console.error("Error updating user:", err);
-                return res.status(500).send("Failed to update profile");
-            }
-
-            req.session.user = { ...req.session.user, ...updateFields };
-            res.redirect('/'); // Redirect back to the index page
-        });
-    } catch (err) {
-        console.error("Error updating user:", err);
-        res.status(500).send("Failed to update profile");
-    }
-});
-
-
-
-
-
 
 // Display notes
-app.get('/noteoptions', (req, res) => {
+app.get('/noteoptions', isAuthenticated,(req, res) => {
+    const user = req.session.user; // Corrected typo
     const userId = req.session.user.id;
     const getNotes = `SELECT * FROM notes WHERE userId = ?`;
 
@@ -436,32 +417,229 @@ app.get('/noteoptions', (req, res) => {
         res.render('noteoptions', {
             title: "PlanITSmart",
             action: 'list',
-            sampledata: mydata,
-            userName: req.session.user.name
+            sampledata: mydata,user,
+            userName: req.session.user.name,
+            user: req.user,
         });
     });
 });
 
 //display events
+
 app.get('/eventoptions', isAuthenticated, (req, res) => {
     const userId = req.session.user.id;
+    const user = req.session.user; // Corrected typo
+
     const getEvents = `SELECT * FROM events WHERE userId = ?`;
 
     conn.query(getEvents, [userId], (err, mydata) => {
-        if (err) throw err;
-            console.log("Data Displayed Successfully!");
-            res.render('eventoptions', {
-                title: "PlanITSmart",
-                action: 'list',
-                sampledata: mydata,
-                userName: req.session.user.name
-            });
+        if (err) {
+            console.error("Error fetching events:", err);
+            return res.status(500).send("Internal Server Error");
+        }
+
+        console.log("Data Displayed Successfully!");
+        res.render('eventoptions', {
+            title: "PlanITSmart",
+            action: 'list',
+            sampledata: mydata,// Pass the user object
+            userName: req.session.user.name,
+            user: req.user,
+
         });
+    });
 });
 
 
+//update profile
 
-// Insert event
+app.post('/updateprofile', async (req, res) => {
+    const { name, email, password, confirmPassword } = req.body;
+
+    // Validate inputs
+    if (password && password !== confirmPassword) {
+        return res.send(`
+            <script>
+                alert("Passwords do not match!");
+                window.history.back();
+            </script>
+        `);
+    }
+
+    try {
+        // Prepare the update query
+        let updateQuery = 'UPDATE users SET name = ?, email = ?';
+        const queryParams = [name, email];
+
+        // If a new password is provided, hash it and add it to the update
+        if (password) {
+            const hashedPassword = await bcrypt.hash(password, 10);
+            updateQuery += ', pass = ?';
+            queryParams.push(hashedPassword);
+        }
+
+        // Add user ID to the query parameters (assuming you have the user's ID)
+        updateQuery += ' WHERE userId = ?';
+        queryParams.push(req.session.user.id);
+
+        // Execute the query
+        conn.query(updateQuery, queryParams, (err, result) => {
+            if (err) {
+                console.error("Error updating data:", err);
+                return res.status(500).send("Internal Server Error");
+            }
+
+            if (result.affectedRows > 0) {
+                console.log('Profile updated successfully!');
+                res.send(`
+                    <script>
+                        alert("Profile updated successfully!");
+                        window.location.href = "/index"; // Redirect to profile page
+                    </script>
+                `);
+            } else {
+                res.send(`
+                    <script>
+                        alert("No changes were made.");
+                        window.history.back();
+                    </script>
+                `);
+            }
+        });
+    } catch (error) {
+        console.error("Error during profile update process:", error);
+        return res.status(500).send("Internal Server Error");
+    }
+});
+app.get('/index', isAuthenticated, (req, res) => {
+    const userId = req.session.user.id;
+    const getEvents = `SELECT * FROM events WHERE userId = ?`;
+    const getNotes = `SELECT * FROM notes WHERE userId = ?`;
+    const dates = `SELECT startDate FROM events WHERE userId = ?`;
+    const time = `SELECT startTime, endTime FROM events WHERE userId = ?`;
+
+    conn.query(getEvents, [userId], (err, eventData) => {
+        if (err) {
+            console.error("Error fetching events:", err);
+            return res.status(500).send("Internal Server Error");
+        }
+
+        conn.query(getNotes, [userId], (err, mydata) => {
+            if (err) {
+                console.error("Error fetching notes:", err);
+                return res.status(500).send("Internal Server Error");
+            }
+
+            conn.query(dates, [userId], (err, dateRows) => {
+                if (err) {
+                    console.error("Error fetching dates:", err);
+                    return res.status(500).send("Internal Server Error");
+                }
+
+                conn.query(time, [userId], (err, timedata) => {
+                    if (err) {
+                        console.error("Error fetching time data:", err);
+                        return res.status(500).send("Internal Server Error");
+                    }
+
+                    // Calculate minutes for each event
+                    const getMinutesDifference = (startTime, endTime) => {
+                        const startParts = startTime.split(':').map(Number);
+                        const endParts = endTime.split(':').map(Number);
+
+                        const startDate = new Date();
+                        startDate.setHours(startParts[0], startParts[1], startParts[2]);
+
+                        const endDate = new Date();
+                        endDate.setHours(endParts[0], endParts[1], endParts[2]);
+
+                        // If end time is earlier than start time, assume it is the next day
+                        if (endDate < startDate) {
+                            endDate.setDate(endDate.getDate() + 1);
+                        }
+
+                        const differenceInMillis = endDate - startDate;
+                        return Math.floor(differenceInMillis / (1000 * 60)); // Convert to minutes
+                    };
+
+                    // Calculate minutes for each event in the timedata
+                    const minutesData = timedata.map(item => {
+                        return getMinutesDifference(item.startTime, item.endTime);
+                    });
+
+                    // Format the fetched dates
+                    const formattedDates = dateRows.map(row => {
+                        const date = new Date(row.startDate);
+                        // Check if the date is valid
+                        if (date instanceof Date && !isNaN(date)) {
+                            return date.toLocaleDateString(undefined, { year: 'numeric', month: '2-digit', day: '2-digit' });
+                        } else {
+                            console.error("Invalid date:", row.startDate);
+                            return null; // or handle invalid date as needed
+                        }
+                    }).filter(date => date !== null);
+                
+                    // Fetched Dates
+                    const fetchedDates = formattedDates;
+
+                    // Create the formatted data array
+                    const formattedData = [['Date', 'Minutes']].concat(
+                        fetchedDates.map((date, index) => [date, minutesData[index]])
+                    );
+
+                    // Output the formatted data
+                    // console.log(formattedData);
+                    function aggregateAndSortMinutes(data) {
+                        // Create an object to hold the total minutes for each date
+                        const minutesByDate = {};
+                    
+                        // Iterate through the data (skip the header)
+                        for (let i = 1; i < data.length; i++) {
+                            const date = data[i][0];
+                            const minutes = data[i][1];
+                    
+                            // If the date already exists, add the minutes; otherwise, initialize it
+                            if (minutesByDate[date]) {
+                                minutesByDate[date] += minutes;
+                            } else {
+                                minutesByDate[date] = minutes;
+                            }
+                        }
+                    
+                        // Convert the object back to an array and sort by date
+                        const aggregatedData = [['Date', 'Minutes']]; // Initialize with the header
+                        for (const date in minutesByDate) {
+                            aggregatedData.push([date, minutesByDate[date]]);
+                        }
+                    
+                        // Sort the aggregated data by date (the first column)
+                        aggregatedData.sort((a, b) => new Date(a[0]) - new Date(b[0]));
+                    
+                        return aggregatedData;
+                    }
+                    
+                    // Example usage
+                    const modifiedformattedData = formattedData;
+                    
+                    const result = aggregateAndSortMinutes(formattedData);
+                    console.log(result);
+
+                    // Render the dashboard with the calculated data
+                    res.render('index', {
+                        title: "PlanITSmart",
+                        action: 'list',
+                        events: eventData,
+                        sampledata: mydata,
+                        userName: req.session.user.name,
+                        user: req.user,
+                        modifiedformattedData: result
+                    });
+                });
+            });
+        });
+    });
+});
+
 // Insert event
 app.post('/addevent', isAuthenticated, (req, res) => {
     // Check if the user is authenticated and retrieve userId from session
@@ -621,18 +799,60 @@ app.get('/register',(req, res)=>{
     res.render('register.ejs');
 });
 
-
-app.get('/updateprofile',(req, res)=>{
-    res.render('manageprofile');
-});
-
-
 app.post('/signup', async (req, res) => {
     const signup_name = req.body.signup_name;
     const signup_email = req.body.signup_email;
     const signup_password = req.body.signup_password;
 
+    // Validation
+    if (!signup_name || signup_name.length < 2) {
+        return res.send(`
+            <script>
+                alert("Name must be at least 2 characters long.");
+                window.history.back();
+            </script>
+        `);
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Simple email regex
+    if (!signup_email || !emailRegex.test(signup_email)) {
+        return res.send(`
+            <script>
+                alert("Please enter a valid email address.");
+                window.history.back();
+            </script>
+        `);
+    }
+
+    if (!signup_password || signup_password.length < 8) {
+        return res.send(`
+            <script>
+                alert("Password must be at least 8 characters long.");
+                window.history.back();
+            </script>
+        `);
+    }
+
     try {
+        // Check if the email already exists
+        const checkEmailQuery = `SELECT * FROM users WHERE email = ?`;
+        const [existingUsers] = await new Promise((resolve, reject) => {
+            conn.query(checkEmailQuery, [signup_email], (err, result) => {
+                if (err) return reject(err);
+                resolve(result);
+            });
+        });
+
+        // Check if existingUsers is defined and has results
+        if (existingUsers && existingUsers.length > 0) {
+            return res.send(`
+                <script>
+                    alert("Email already in use. Please choose another.");
+                    window.history.back();
+                </script>
+            `);
+        }
+
         // Hash the password before storing it
         const hashedPassword = await bcrypt.hash(signup_password, 10);
 
@@ -654,7 +874,7 @@ app.post('/signup', async (req, res) => {
             `);
         });
     } catch (error) {
-        console.error("Error hashing password:", error);
+        console.error("Error during signup process:", error);
         return res.status(500).send("Internal Server Error");
     }
 });
