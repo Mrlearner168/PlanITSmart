@@ -350,31 +350,46 @@
                       </div>
                       
                       <script type="text/javascript">
-                      google.charts.load('current', {'packages':['corechart']});
-                      google.charts.setOnLoadCallback(initializeChart);
-                      
-                      function initializeChart() {
-                         const chartElement = document.getElementById('chart_div');
-                         const chartData = JSON.parse(chartElement.dataset.chartInfo || '[]');
-                      
-                         if (chartData.length > 0) {
-                             drawChart(chartData);
-                         } else {
-                             chartElement.innerHTML = "No data available";
-                         }
-                      }
-                      
-                      function drawChart(data) {
-                         var formattedData = google.visualization.arrayToDataTable(data);
-                         var options = {
-                             title: 'Day Schedule Progress',
-                             hAxis: {title: 'Data(Month ,Day , Year)', titleTextStyle: {color: '#333'}},
-                             vAxis: {minValue: 0}
-                         };
-                         var chart = new google.visualization.AreaChart(document.getElementById('chart_div'));
-                         chart.draw(formattedData, options);
-                      }
-                      </script>
+                        // Function to format date as "Oct. 3 Thursday 2024"
+                        function formatDate(dateString) {
+                            const date = new Date(dateString);
+                            const options = { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' };
+                            return date.toLocaleDateString('en-US', options).replace(',', ''); // Remove comma for desired format
+                        }
+                    
+                        // Initialize Area Chart
+                        function initializeChart() {
+                            const chartElement = document.getElementById('chart_div');
+                            const chartData = JSON.parse(chartElement.dataset.chartInfo || '[]');
+                    
+                            if (chartData.length > 0) {
+                                // Format the dates in the chart data
+                                const formattedData = chartData.map(row => {
+                                    const formattedDate = formatDate(row[0]); // Format the date
+                                    return [formattedDate, ...row.slice(1)]; // Replace date with formatted date
+                                });
+                                drawChart(formattedData);
+                            } else {
+                                chartElement.innerHTML = "No data available";
+                            }
+                        }
+                    
+                        // Draw Area Chart
+                        function drawChart(data) {
+                            var formattedData = google.visualization.arrayToDataTable(data);
+                            var options = {
+                                title: 'Day Schedule Progress',
+                                hAxis: { title: 'Date', titleTextStyle: { color: '#333' } },
+                                vAxis: { minValue: 0 }
+                            };
+                            var chart = new google.visualization.AreaChart(document.getElementById('chart_div'));
+                            chart.draw(formattedData, options);
+                        }
+                    
+                        // Load Google Charts and set callbacks
+                        google.charts.load('current', { 'packages': ['corechart'] });
+                        google.charts.setOnLoadCallback(initializeChart);
+                    </script>
                       </thead>
                   </div>
               </div>

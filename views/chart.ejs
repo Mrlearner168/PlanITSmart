@@ -271,72 +271,92 @@
                   <div class="table-responsive text-nowrap">
                       <thead class="table-light">
                         <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-                        <h5 style="text-align: center">Area Chart</h5>
                        <!-- In your HTML -->
-                      <div id="chart_div" 
-                      data-chart-info='<%- JSON.stringify(modifiedformattedData) %>'
-                      style="width: 100%; height: 500px;">
-                      </div>
+                       <h5 style="text-align: center">Area Chart</h5>
+                       <div id="chart_div" 
+                            data-chart-info='<%- JSON.stringify(modifiedformattedData) %>'
+                            style="width: 100%; height: 500px;">
+                       </div>
+                       <br>
+                       <h5 style="text-align: center">Scatter Chart</h5>
+                       <div id="chart_divs" 
+                            data-chart-info='<%- JSON.stringify(modifiedformattedData) %>'
+                            style="width: 100%; height: 500px;">
+                       </div>
+                       <!-- script for chart -->
 
                       <script type="text/javascript">
-                      google.charts.load('current', {'packages':['corechart']});
-                      google.charts.setOnLoadCallback(initializeChart);
-                      
-                      function initializeChart() {
-                         const chartElement = document.getElementById('chart_div');
-                         const chartData = JSON.parse(chartElement.dataset.chartInfo || '[]');
-                      
-                         if (chartData.length > 0) {
-                             drawChart(chartData);
-                         } else {
-                             chartElement.innerHTML = "No data available";
-                         }
-                      }
-
-                      function drawChart(data) {
-                         var formattedData = google.visualization.arrayToDataTable(data);
-                         var options = {
-                             title: 'Day Schedule Progress',
-                             hAxis: {title: 'Date(Month, Day, Year)', titleTextStyle: {color: '#333'}},
-                             vAxis: {minValue: 0}
-                         };
-                         var chart = new google.visualization.AreaChart(document.getElementById('chart_div'));
-                         chart.draw(formattedData, options);
-                      }
-                      </script>
-                      <h5  style="text-align: center">Scatter Chart</h5>
-                      <div id="chart_divs" 
-                      data-chart-info='<%- JSON.stringify(modifiedformattedData) %>'
-                      style="width: 100%; height: 500px;">
-                      </div>
-                      
-                      <script type="text/javascript">
-                      google.charts.load('current', {'packages':['corechart']});
-                      google.charts.setOnLoadCallback(initializeChart2);
-                      
-                      function initializeChart2() {
-                         const chartElement = document.getElementById('chart_divs');
-                         const chartData = JSON.parse(chartElement.dataset.chartInfo || '[]');
-                      
-                         if (chartData.length > 0) {
-                             drawChart2(chartData);
-                         } else {
-                             chartElement.innerHTML = "No data available";
-                         }
-                      }
-                      
-                      function drawChart2(data) {
-                         var formattedData = google.visualization.arrayToDataTable(data);
-                         var options = {
-                             title: '',
-                             hAxis: {title: 'Data(Month ,Day , Year', minValue: 0, maxValue: 15},
-                             vAxis: {title: 'Minutes', minValue: 0, maxValue: 15},
-                             legend: 'none'
-                         };
+                          // Function to format date as "Oct. 3 Thursday 2024"
+                          function formatDate(dateString) {
+                              const date = new Date(dateString);
+                              const options = { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' };
+                              return date.toLocaleDateString('en-US', options).replace(',', ''); // Remove comma for desired format
+                          }
                         
-                         var chart = new google.visualization.ScatterChart(document.getElementById('chart_divs'));
-                         chart.draw(formattedData, options);
-                      }
+                          // Initialize Area Chart
+                          function initializeChart() {
+                              const chartElement = document.getElementById('chart_div');
+                              const chartData = JSON.parse(chartElement.dataset.chartInfo || '[]');
+                          
+                              if (chartData.length > 0) {
+                                  // Format the dates in the chart data
+                                  const formattedData = chartData.map(row => {
+                                      const formattedDate = formatDate(row[0]); // Format the date
+                                      return [formattedDate, ...row.slice(1)]; // Replace date with formatted date
+                                  });
+                                  drawChart(formattedData);
+                              } else {
+                                  chartElement.innerHTML = "No data available";
+                              }
+                          }
+                        
+                          // Draw Area Chart
+                          function drawChart(data) {
+                              var formattedData = google.visualization.arrayToDataTable(data);
+                              var options = {
+                                  title: 'Day Schedule Progress',
+                                  hAxis: { title: 'Date', titleTextStyle: { color: '#333' } },
+                                  vAxis: { minValue: 0 }
+                              };
+                              var chart = new google.visualization.AreaChart(document.getElementById('chart_div'));
+                              chart.draw(formattedData, options);
+                          }
+                        
+                          // Initialize Scatter Chart
+                          function initializeChart2() {
+                              const chartElement = document.getElementById('chart_divs');
+                              const chartData = JSON.parse(chartElement.dataset.chartInfo || '[]');
+                          
+                              if (chartData.length > 0) {
+                                  // Format the dates in the chart data
+                                  const formattedData = chartData.map(row => {
+                                      const formattedDate = formatDate(row[0]); // Format the date
+                                      return [formattedDate, ...row.slice(1)]; // Replace date with formatted date
+                                  });
+                                  drawChart2(formattedData);
+                              } else {
+                                  chartElement.innerHTML = "No data available";
+                              }
+                          }
+                        
+                          // Draw Scatter Chart
+                          function drawChart2(data) {
+                              var formattedData = google.visualization.arrayToDataTable(data);
+                              var options = {
+                                  title: '',
+                                  hAxis: { title: 'Date', minValue: 0, maxValue: 15 },
+                                  vAxis: { title: 'Minutes', minValue: 0, maxValue: 15 },
+                                  legend: 'none'
+                              };
+                            
+                              var chart = new google.visualization.ScatterChart(document.getElementById('chart_divs'));
+                              chart.draw(formattedData, options);
+                          }
+                        
+                          // Load Google Charts and set callbacks
+                          google.charts.load('current', { 'packages': ['corechart'] });
+                          google.charts.setOnLoadCallback(initializeChart);
+                          google.charts.setOnLoadCallback(initializeChart2);
                       </script>
                       </thead>
                     
