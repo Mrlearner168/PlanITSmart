@@ -834,25 +834,25 @@ app.post('/signup', async (req, res) => {
     }
 
     try {
-        // Check if the email already exists
-        const checkEmailQuery = `SELECT * FROM users WHERE email = ?`;
-        const [existingUsers] = await new Promise((resolve, reject) => {
-            conn.query(checkEmailQuery, [signup_email], (err, result) => {
-                if (err) return reject(err);
-                resolve(result);
-            });
-        });
 
-        // Check if existingUsers is defined and has results
-        if (existingUsers && existingUsers.length > 0) {
-            return res.send(`
+         // Check if the email already exists
+    const check_email = `SELECT * FROM users WHERE email = ?`;
+    
+    conn.query(check_email, [signup_email], async (err, results) => {
+        if (err) {
+            console.error("Error checking email:", err);
+            return res.status(500).send("Internal Server Error");
+        }
+
+        // If results are not empty, the email is already taken
+        if (results.length > 0) {
+            return res.status(400).send(`
                 <script>
-                    alert("Email already in use. Please choose another.");
-                    window.history.back();
+                    alert("Email already exists. Please use a different email.");
+                    window.location.href="/signup"; // Redirect back to signup page
                 </script>
             `);
         }
-
         // Hash the password before storing it
         const hashedPassword = await bcrypt.hash(signup_password, 10);
 
@@ -873,11 +873,19 @@ app.post('/signup', async (req, res) => {
                 </script>
             `);
         });
+    });
     } catch (error) {
         console.error("Error during signup process:", error);
         return res.status(500).send("Internal Server Error");
     }
 });
+
+app.get('/signup', (req, res) => {
+    res.render('register'); // This will render register.ejs
+});
+
+
+
 
 // Login route
 app.post('/login', (req, res) => {

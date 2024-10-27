@@ -153,12 +153,12 @@
                 <div class="text-truncate" data-i18n="Charts">Charts</div>
             </a>
         </li>
-          <li class="menu-item">
-            <a href="#" class="menu-link">
-              <i class="menu-icon tf-icons bx bx-file"></i>
-              <div class="text-truncate" data-i18n="Documentation">Documentation</div>
-            </a>
-          </li>
+        <li class="menu-item">
+          <button onclick="printPage()" class="menu-link ">
+            <i class="menu-icon tf-icons bx bx-file"></i>
+            <div class="text-truncate" data-i18n="Documentation">Print this page</div>
+          </button>
+        </li>
         </ul>
       </aside>
       <!-- / Menu -->
@@ -178,13 +178,13 @@
 
           <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
             <!-- Search -->
-            <div class="navbar-nav align-items-center">
+            <form action="/search" method="POST">
               <div class="nav-item d-flex align-items-center">
-                <i class="bx bx-search bx-md"></i>
-                <input type="text" class="form-control border-0 shadow-none ps-1 ps-sm-2" placeholder="Search..."
-                  aria-label="Search..." />
+                  <i class="bx bx-search bx-md"></i>
+                  <input type="text" name="search" class="form-control border-0 shadow-none ps-1 ps-sm-2" placeholder="Search..." aria-label="Search..." />
+                  <button type="submit" class="btn btn-primary">Search</button>
               </div>
-            </div>
+          </form>
             <!-- /Search -->
 
             <ul class="navbar-nav flex-row align-items-center ms-auto">
@@ -499,7 +499,7 @@
                         <input type="text" name="noteLabel" required class="form-control" aria-label="noteLabel">
                       </div>
                       <div class="col">
-                        <label for="date" class="form-label">DUE DATE</label>
+                        <label for="date" class="form-label">DATE</label>
                         <input type="date" name="dueDate" required class="form-control" aria-label="dueDate">
                       </div>
                     </div>
@@ -548,7 +548,11 @@
     <div class="layout-overlay layout-menu-toggle"></div>
   </div>
   <!-- / Layout wrapper -->
-
+  <script>
+    function printPage() {
+      window.print(); // Trigger the print dialog
+    }
+  </script>
 
   <!-- Core JS -->
   <!-- build:js vendor/js/core.js -->

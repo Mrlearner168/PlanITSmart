@@ -158,12 +158,11 @@
                         </a>
                     </li>
                     <li class="menu-item">
-                        <a href="https://demos.themeselection.com/sneat-bootstrap-html-admin-template/documentation/"
-                            target="_blank" class="menu-link">
-                            <i class="menu-icon tf-icons bx bx-file"></i>
-                            <div class="text-truncate" data-i18n="Documentation">Documentation</div>
-                        </a>
-                    </li>
+                        <button onclick="printPage()" class="menu-link ">
+                          <i class="menu-icon tf-icons bx bx-file"></i>
+                          <div class="text-truncate" data-i18n="Documentation">Print this page</div>
+                        </button>
+                      </li>
                 </ul>
             </aside>
             <!-- / Menu -->
@@ -182,13 +181,13 @@
 
                     <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
                         <!-- Search -->
-                        <div class="navbar-nav align-items-center">
+                        <form action="/search" method="POST">
                             <div class="nav-item d-flex align-items-center">
                                 <i class="bx bx-search bx-md"></i>
-                                <input type="text" class="form-control border-0 shadow-none ps-1 ps-sm-2"
-                                    placeholder="Search..." aria-label="Search..." />
+                                <input type="text" name="search" class="form-control border-0 shadow-none ps-1 ps-sm-2" placeholder="Search..." aria-label="Search..." />
+                                <button type="submit" class="btn btn-primary">Search</button>
                             </div>
-                        </div>
+                        </form>
                         <!-- /Search -->
 
                         <ul class="navbar-nav flex-row align-items-center ms-auto">
@@ -276,7 +275,7 @@
                                                     <th>TITLE</th>
                                                     <th>DESCRIPTION</th>
                                                     <th>NOTE LABEL</th>
-                                                    <th>DUE DATE</th>
+                                                    <th>DATE</th>
                                                     <th>ACTION 1</th>
                                                     <th>ACTION 2</th>
                                                 </tr>
@@ -331,7 +330,7 @@
                                                                             class="form-control">
                                                                     </div>
                                                                     <div class="input-group mb-3">
-                                                                        <span class="input-group-text">DUE DATE</span>
+                                                                        <span class="input-group-text">DATE</span>
                                                                         <input type="date" name="dueDate"
                                                                             value="<%= mydata.dueDate %>" required
                                                                             class="form-control">
@@ -499,16 +498,16 @@
                                                     aria-label="noteLabel">
                                             </div>
                                             <div class="col">
-                                                <label for="date" class="form-label">DUE DATE</label>
+                                                <label for="date" class="form-label">DATE</label>
                                                 <input type="date" name="dueDate" required class="form-control"
                                                     aria-label="dueDate">
                                             </div>
 
-                                            <div class="col">
+                                            <!-- <div class="col">
                                                 <label for="reminder" class="form-label">REMINDER</label>
                                                 <input type="datetime-local" name="reminder" required
                                                     class="form-control" aria-label="reminder">
-                                            </div>
+                                            </div> -->
                                         </div>
                                         </p>
                                         <div class="modal-footer">
@@ -560,7 +559,11 @@
 
     <!-- Core JS -->
     <!-- build:js vendor/js/core.js -->
-
+    <script>
+        function printPage() {
+          window.print(); // Trigger the print dialog
+        }
+      </script>
     <script src="vendor/libs/jquery/jquery.js"></script>
     <script src="vendor/libs/popper/popper.js"></script>
     <script src="vendor/js/bootstrap.js"></script>

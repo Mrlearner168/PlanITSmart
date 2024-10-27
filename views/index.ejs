@@ -188,13 +188,13 @@
 
           <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
             <!-- Search -->
-            <div class="navbar-nav align-items-center">
+            <form action="/search" method="POST">
               <div class="nav-item d-flex align-items-center">
-                <i class="bx bx-search bx-md"></i>
-                <input type="text" class="form-control border-0 shadow-none ps-1 ps-sm-2" placeholder="Search..."
-                  aria-label="Search..." />
+                  <i class="bx bx-search bx-md"></i>
+                  <input type="text" name="search" class="form-control border-0 shadow-none ps-1 ps-sm-2" placeholder="Search..." aria-label="Search..."  required/>
+                  <button type="submit" class="btn btn-primary">Search</button>
               </div>
-            </div>
+          </form>
             <!-- /Search -->
 
             <ul class="navbar-nav flex-row align-items-center ms-auto">
@@ -315,7 +315,7 @@
                           <th>TITLE</th>
                           <th>DESCRIPTION</th>
                           <th>NOTE LABEL</th>
-                          <th>DUE DATE</th>
+                          <th>DATE</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -533,7 +533,7 @@
                             <input type="text" name="noteLabel" required class="form-control" aria-label="noteLabel">
                           </div>
                           <div class="col">
-                            <label for="date" class="form-label">DUE DATE</label>
+                            <label for="date" class="form-label">DATE</label>
                             <input type="date" name="dueDate" required class="form-control" aria-label="dueDate">
                           </div>
                         </div>
